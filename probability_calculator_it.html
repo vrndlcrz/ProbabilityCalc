@@ -1,0 +1,371 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --y:#F5C400;
+  --yd:#B8930A;
+  --yl:#FFF3B0;
+  --blk:#1A1A1A;
+  --blk2:#2C2C2C;
+  --blk3:#3D3D3D;
+  --txt:#F0E8C8;
+  --txts:#C8BF9A;
+  --rad:10px;
+}
+body{background:var(--blk);color:var(--txt);font-family:var(--font-sans,system-ui,sans-serif);font-size:15px;line-height:1.6;padding:0 0 2rem}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.header{background:var(--y);color:var(--blk);padding:1.2rem 1rem 1rem;text-align:center}
+.header h1{font-size:20px;font-weight:500;letter-spacing:-.3px}
+.header p{font-size:13px;color:var(--blk2);margin-top:4px}
+.tabs{display:flex;flex-wrap:wrap;gap:0;background:var(--blk2);border-bottom:2px solid var(--y);overflow-x:auto}
+.tab{padding:10px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap;border:none;background:none;color:var(--txts);transition:.15s;flex-shrink:0}
+.tab.active{background:var(--y);color:var(--blk);font-weight:500}
+.tab:hover:not(.active){background:var(--blk3);color:var(--txt)}
+.panel{display:none;padding:1.25rem 1rem}
+.panel.active{display:block}
+.card{background:var(--blk2);border:1px solid var(--blk3);border-radius:var(--rad);padding:1rem;margin-bottom:1rem}
+.card-title{font-size:13px;color:var(--y);font-weight:500;margin-bottom:.75rem;letter-spacing:.3px;text-transform:uppercase}
+label{display:block;font-size:13px;color:var(--txts);margin-bottom:4px;margin-top:10px}
+label:first-of-type{margin-top:0}
+input[type=number],select{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--blk3);background:var(--blk);color:var(--txt);font-size:15px;outline:none;transition:.15s}
+input[type=number]:focus,select:focus{border-color:var(--y)}
+.btn{display:block;width:100%;padding:11px;background:var(--y);color:var(--blk);border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;margin-top:1rem;transition:.15s}
+.btn:active{opacity:.85}
+.result{background:var(--blk);border:1px solid var(--y);border-radius:var(--rad);padding:1rem;margin-top:1rem;display:none}
+.result-val{font-size:32px;font-weight:500;color:var(--y)}
+.result-label{font-size:13px;color:var(--txts);margin-top:4px}
+.result-interp{font-size:13.5px;color:var(--txt);margin-top:10px;padding-top:10px;border-top:1px solid var(--blk3);line-height:1.6}
+.formula-box{background:var(--blk3);border-left:3px solid var(--y);border-radius:0 6px 6px 0;padding:.6rem .85rem;font-size:13px;color:var(--yl);margin-bottom:.75rem;font-style:italic}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.step{background:var(--blk);border:1px solid var(--blk3);border-radius:8px;padding:.75rem;margin-top:.5rem}
+.step-num{font-size:11px;color:var(--y);font-weight:500;text-transform:uppercase;margin-bottom:4px}
+.step-val{font-size:18px;color:var(--yl)}
+.warn{font-size:12px;color:#F0A040;margin-top:6px}
+.source-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+</style>
+
+<h2 class="sr-only">Probability Calculator for IT — covers basic, addition, multiplication, complement, conditional, Bayes, binomial, and total probability formulas.</h2>
+
+<div class="header">
+  <h1>Probability Calculator for IT</h1>
+  <p>Basic · Addition · Multiplication · Bayes · Binomial & more</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" onclick="switchTab(0)">Basic</button>
+  <button class="tab" onclick="switchTab(1)">Addition</button>
+  <button class="tab" onclick="switchTab(2)">Multiplication</button>
+  <button class="tab" onclick="switchTab(3)">Complement</button>
+  <button class="tab" onclick="switchTab(4)">Conditional</button>
+  <button class="tab" onclick="switchTab(5)">Total Prob.</button>
+  <button class="tab" onclick="switchTab(6)">Bayes'</button>
+  <button class="tab" onclick="switchTab(7)">Binomial</button>
+</div>
+
+<!-- BASIC -->
+<div class="panel active" id="p0">
+  <div class="card">
+    <div class="card-title">Basic Probability</div>
+    <div class="formula-box">P(event) = Favorable outcomes / Total outcomes</div>
+    <label>Favorable outcomes</label>
+    <input type="number" id="b_fav" value="2" min="0" step="1">
+    <label>Total possible outcomes</label>
+    <input type="number" id="b_tot" value="8" min="1" step="1">
+    <button class="btn" onclick="calcBasic()">Calculate</button>
+  </div>
+  <div class="result" id="r0">
+    <div class="result-val" id="r0v"></div>
+    <div class="result-label">Probability of event</div>
+    <div class="result-interp" id="r0i"></div>
+  </div>
+</div>
+
+<!-- ADDITION -->
+<div class="panel" id="p1">
+  <div class="card">
+    <div class="card-title">Addition Rule</div>
+    <div class="formula-box" id="add_formula">P(A or B) = P(A) + P(B) − P(A and B)</div>
+    <label>Are events mutually exclusive?</label>
+    <select id="a_excl" onchange="toggleMutex()">
+      <option value="no">No — they can happen together</option>
+      <option value="yes">Yes — they cannot happen together</option>
+    </select>
+    <div class="row2">
+      <div><label>P(A)</label><input type="number" id="a_pa" value="0.1" min="0" max="1" step="0.01"></div>
+      <div><label>P(B)</label><input type="number" id="a_pb" value="0.05" min="0" max="1" step="0.01"></div>
+    </div>
+    <div id="a_ab_wrap">
+      <label>P(A and B)</label>
+      <input type="number" id="a_pab" value="0.01" min="0" max="1" step="0.01">
+    </div>
+    <button class="btn" onclick="calcAddition()">Calculate</button>
+  </div>
+  <div class="result" id="r1">
+    <div class="result-val" id="r1v"></div>
+    <div class="result-label">P(A or B)</div>
+    <div class="result-interp" id="r1i"></div>
+  </div>
+</div>
+
+<!-- MULTIPLICATION -->
+<div class="panel" id="p2">
+  <div class="card">
+    <div class="card-title">Multiplication Rule</div>
+    <div class="formula-box" id="mul_formula">P(A and B) = P(A) × P(B)  [independent events]</div>
+    <label>Are events independent?</label>
+    <select id="m_indep" onchange="toggleDepend()">
+      <option value="yes">Yes — independent events</option>
+      <option value="no">No — dependent events</option>
+    </select>
+    <div class="row2">
+      <div><label>P(A)</label><input type="number" id="m_pa" value="0.9" min="0" max="1" step="0.01"></div>
+      <div id="m_pb_wrap"><label>P(B)</label><input type="number" id="m_pb" value="0.9" min="0" max="1" step="0.01"></div>
+    </div>
+    <div id="m_bga_wrap" style="display:none">
+      <label>P(B | A) — P(B given A has occurred)</label>
+      <input type="number" id="m_bga" value="0.7" min="0" max="1" step="0.01">
+    </div>
+    <button class="btn" onclick="calcMultiply()">Calculate</button>
+  </div>
+  <div class="result" id="r2">
+    <div class="result-val" id="r2v"></div>
+    <div class="result-label" id="r2l">P(A and B)</div>
+    <div class="result-interp" id="r2i"></div>
+  </div>
+</div>
+
+<!-- COMPLEMENT -->
+<div class="panel" id="p3">
+  <div class="card">
+    <div class="card-title">Complement Rule</div>
+    <div class="formula-box">P(not A) = 1 − P(A)</div>
+    <label>P(A) — probability of event occurring</label>
+    <input type="number" id="c_pa" value="0.95" min="0" max="1" step="0.01">
+    <button class="btn" onclick="calcComplement()">Calculate</button>
+  </div>
+  <div class="result" id="r3">
+    <div class="result-val" id="r3v"></div>
+    <div class="result-label">P(not A)</div>
+    <div class="result-interp" id="r3i"></div>
+  </div>
+</div>
+
+<!-- CONDITIONAL / JOINT -->
+<div class="panel" id="p4">
+  <div class="card">
+    <div class="card-title">Conditional & Joint Probability</div>
+    <div class="formula-box">P(A∩B) = P(A) × P(B|A) → P(crash) = P(A∩B) × P(crash|both)</div>
+    <label>P(A) — e.g. CPU overload</label>
+    <input type="number" id="j_pa" value="0.4" min="0" max="1" step="0.01">
+    <label>P(B | A) — e.g. memory overload given CPU overload</label>
+    <input type="number" id="j_bga" value="0.7" min="0" max="1" step="0.01">
+    <label>P(outcome | A and B) — e.g. crash given both</label>
+    <input type="number" id="j_cgab" value="0.8" min="0" max="1" step="0.01">
+    <button class="btn" onclick="calcConditional()">Calculate</button>
+  </div>
+  <div class="result" id="r4">
+    <div class="step"><div class="step-num">Step 1 — P(A and B)</div><div class="step-val" id="r4s1"></div></div>
+    <div class="step" style="margin-top:8px"><div class="step-num">Step 2 — Final outcome probability</div><div class="step-val" id="r4s2"></div></div>
+    <div class="result-interp" id="r4i" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- TOTAL PROBABILITY -->
+<div class="panel" id="p5">
+  <div class="card">
+    <div class="card-title">Law of Total Probability</div>
+    <div class="formula-box">P(F) = Σ P(source_i) × P(failure | source_i)</div>
+    <p style="font-size:12.5px;color:var(--txts);margin-bottom:.75rem">Enter up to 3 failure sources. Probabilities of sources must sum to 1.</p>
+    <div class="source-row">
+      <div><label>P(S₁)</label><input type="number" id="t_s1" value="0.5" min="0" max="1" step="0.01"></div>
+      <div><label>P(F|S₁)</label><input type="number" id="t_f1" value="0.2" min="0" max="1" step="0.01"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:1px"><span style="font-size:12px;color:var(--txts)">e.g. software</span></div>
+    </div>
+    <div class="source-row">
+      <div><label>P(S₂)</label><input type="number" id="t_s2" value="0.3" min="0" max="1" step="0.01"></div>
+      <div><label>P(F|S₂)</label><input type="number" id="t_f2" value="0.5" min="0" max="1" step="0.01"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:1px"><span style="font-size:12px;color:var(--txts)">e.g. hardware</span></div>
+    </div>
+    <div class="source-row">
+      <div><label>P(S₃)</label><input type="number" id="t_s3" value="0.2" min="0" max="1" step="0.01"></div>
+      <div><label>P(F|S₃)</label><input type="number" id="t_f3" value="0.4" min="0" max="1" step="0.01"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:1px"><span style="font-size:12px;color:var(--txts)">e.g. network</span></div>
+    </div>
+    <div id="t_warn" class="warn" style="display:none">⚠ Source probabilities must sum to 1.</div>
+    <button class="btn" onclick="calcTotal()">Calculate</button>
+  </div>
+  <div class="result" id="r5">
+    <div class="result-val" id="r5v"></div>
+    <div class="result-label">Total probability of failure</div>
+    <div class="result-interp" id="r5i"></div>
+  </div>
+</div>
+
+<!-- BAYES -->
+<div class="panel" id="p6">
+  <div class="card">
+    <div class="card-title">Bayes' Theorem</div>
+    <div class="formula-box">P(A|B) = [P(B|A) × P(A)] / P(B)</div>
+    <label>P(A) — prior probability, e.g. P(attack) = 0.02</label>
+    <input type="number" id="bay_pa" value="0.02" min="0" max="1" step="0.001">
+    <label>P(B | A) — likelihood, e.g. P(alert | attack) = 0.9</label>
+    <input type="number" id="bay_bga" value="0.9" min="0" max="1" step="0.01">
+    <label>P(B | not A) — false positive rate, e.g. P(alert | no attack) = 0.1</label>
+    <input type="number" id="bay_bgna" value="0.1" min="0" max="1" step="0.01">
+    <button class="btn" onclick="calcBayes()">Calculate</button>
+  </div>
+  <div class="result" id="r6">
+    <div class="step"><div class="step-num">Step 1 — P(B) total evidence</div><div class="step-val" id="r6s1"></div></div>
+    <div class="step" style="margin-top:8px"><div class="step-num">Step 2 — P(A | B) posterior</div><div class="step-val" id="r6s2"></div></div>
+    <div class="result-interp" id="r6i" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- BINOMIAL -->
+<div class="panel" id="p7">
+  <div class="card">
+    <div class="card-title">Binomial Probability</div>
+    <div class="formula-box">P(X=k) = C(n,k) × p^k × (1−p)^(n−k)</div>
+    <div class="row2">
+      <div><label>n — total trials</label><input type="number" id="bin_n" value="10" min="1" max="100" step="1"></div>
+      <div><label>k — successes wanted</label><input type="number" id="bin_k" value="2" min="0" step="1"></div>
+    </div>
+    <label>p — probability of success per trial, e.g. packet loss 0.05</label>
+    <input type="number" id="bin_p" value="0.05" min="0" max="1" step="0.001">
+    <button class="btn" onclick="calcBinomial()">Calculate</button>
+  </div>
+  <div class="result" id="r7">
+    <div class="step"><div class="step-num">C(n,k)</div><div class="step-val" id="r7s1"></div></div>
+    <div class="step" style="margin-top:8px"><div class="step-num">P(X = k)</div><div class="step-val" id="r7s2"></div></div>
+    <div class="result-interp" id="r7i" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j));
+}
+function showResult(id,val,interp,extra){
+  const r=document.getElementById(id);
+  r.style.display='block';
+  if(val!==null) document.getElementById(id+'v').textContent=val;
+  if(interp) document.getElementById(id+'i').textContent=interp;
+}
+function pct(v,d=2){return(v*100).toFixed(d)+'%';}
+function fmt(v,d=4){return parseFloat(v.toFixed(d));}
+
+function calcBasic(){
+  const fav=+document.getElementById('b_fav').value;
+  const tot=+document.getElementById('b_tot').value;
+  if(tot<=0){alert('Total outcomes must be > 0');return;}
+  if(fav>tot){alert('Favorable cannot exceed total');return;}
+  const p=fav/tot;
+  showResult('r0',fmt(p)+'  ('+pct(p)+')',
+    `With ${fav} favorable outcome(s) out of ${tot}, there is a ${pct(p)} probability of the event occurring.`);
+}
+
+function toggleMutex(){
+  const ex=document.getElementById('a_excl').value==='yes';
+  document.getElementById('a_ab_wrap').style.display=ex?'none':'block';
+  document.getElementById('add_formula').textContent=ex?
+    'P(A or B) = P(A) + P(B)  [mutually exclusive]':
+    'P(A or B) = P(A) + P(B) − P(A and B)';
+}
+
+function calcAddition(){
+  const pa=+document.getElementById('a_pa').value;
+  const pb=+document.getElementById('a_pb').value;
+  const ex=document.getElementById('a_excl').value==='yes';
+  let p,pab=0;
+  if(ex){p=pa+pb;}
+  else{pab=+document.getElementById('a_pab').value;p=pa+pb-pab;}
+  if(p<0||p>1.0001){alert('Result out of [0,1]. Check inputs.');return;}
+  showResult('r1',fmt(p)+'  ('+pct(p)+')',
+    `Probability that at least one of the events occurs is ${pct(p)}.${ex?'':' This accounts for the joint probability of P(A∩B) = '+pct(pab)+'.'}`)
+}
+
+function toggleDepend(){
+  const indep=document.getElementById('m_indep').value==='yes';
+  document.getElementById('m_bga_wrap').style.display=indep?'none':'block';
+  document.getElementById('mul_formula').textContent=indep?
+    'P(A and B) = P(A) × P(B)  [independent]':
+    'P(A and B) = P(A) × P(B|A)  [dependent]';
+}
+
+function calcMultiply(){
+  const pa=+document.getElementById('m_pa').value;
+  const indep=document.getElementById('m_indep').value==='yes';
+  let p;
+  if(indep){const pb=+document.getElementById('m_pb').value;p=pa*pb;}
+  else{const bga=+document.getElementById('m_bga').value;p=pa*bga;}
+  showResult('r2',fmt(p)+'  ('+pct(p)+')',
+    `The probability of both events occurring together is ${pct(p)}.`);
+}
+
+function calcComplement(){
+  const pa=+document.getElementById('c_pa').value;
+  if(pa<0||pa>1){alert('P(A) must be between 0 and 1');return;}
+  const p=1-pa;
+  showResult('r3',fmt(p)+'  ('+pct(p)+')',
+    `If the event has a ${pct(pa)} chance of occurring, there is a ${pct(p)} chance it will NOT occur.`);
+}
+
+function calcConditional(){
+  const pa=+document.getElementById('j_pa').value;
+  const bga=+document.getElementById('j_bga').value;
+  const cgab=+document.getElementById('j_cgab').value;
+  const pab=pa*bga;
+  const pout=pab*cgab;
+  document.getElementById('r4s1').textContent=fmt(pab)+' ('+pct(pab)+')';
+  document.getElementById('r4s2').textContent=fmt(pout)+' ('+pct(pout)+')';
+  document.getElementById('r4i').textContent=
+    `There is a ${pct(pout)} chance the final outcome occurs due to cascading dependencies.`;
+  document.getElementById('r4').style.display='block';
+}
+
+function calcTotal(){
+  const s=[+document.getElementById('t_s1').value,+document.getElementById('t_s2').value,+document.getElementById('t_s3').value];
+  const f=[+document.getElementById('t_f1').value,+document.getElementById('t_f2').value,+document.getElementById('t_f3').value];
+  const sum=s.reduce((a,b)=>a+b,0);
+  document.getElementById('t_warn').style.display=Math.abs(sum-1)>0.01?'block':'none';
+  const p=s[0]*f[0]+s[1]*f[1]+s[2]*f[2];
+  showResult('r5',fmt(p)+'  ('+pct(p)+')',
+    `The total probability of failure from all sources combined is ${pct(p)}.`);
+}
+
+function calcBayes(){
+  const pa=+document.getElementById('bay_pa').value;
+  const bga=+document.getElementById('bay_bga').value;
+  const bgna=+document.getElementById('bay_bgna').value;
+  const pb=pa*bga+(1-pa)*bgna;
+  const post=(pa*bga)/pb;
+  document.getElementById('r6s1').textContent=fmt(pb,6)+' ('+pct(pb)+')';
+  document.getElementById('r6s2').textContent=fmt(post)+'  ('+pct(post)+')';
+  document.getElementById('r6i').textContent=
+    `Given the observed evidence, the posterior probability is ${pct(post)}. `+
+    (post<0.5?`This may indicate a high false-positive rate — only ${pct(post)} of alerts are genuine.`:
+    `More than half of alerts are likely genuine events.`);
+  document.getElementById('r6').style.display='block';
+}
+
+function comb(n,k){
+  if(k>n)return 0;if(k===0||k===n)return 1;
+  let r=1;for(let i=0;i<k;i++){r=r*(n-i)/(i+1);}return Math.round(r);
+}
+
+function calcBinomial(){
+  const n=+document.getElementById('bin_n').value;
+  const k=+document.getElementById('bin_k').value;
+  const p=+document.getElementById('bin_p').value;
+  if(k>n){alert('k cannot exceed n');return;}
+  const c=comb(n,k);
+  const prob=c*Math.pow(p,k)*Math.pow(1-p,n-k);
+  document.getElementById('r7s1').textContent=c.toLocaleString();
+  document.getElementById('r7s2').textContent=fmt(prob)+'  ('+pct(prob)+')';
+  document.getElementById('r7i').textContent=
+    `There is a ${pct(prob)} chance of getting exactly ${k} occurrence(s) in ${n} trial(s) with p = ${p}.`;
+  document.getElementById('r7').style.display='block';
+}
+toggleMutex();toggleDepend();
+</script>
